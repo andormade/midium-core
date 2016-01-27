@@ -1,0 +1,22 @@
+{
+  "name": "nota",
+  "author": {
+    "name": "Andor Polgar",
+    "email": "hngrhorace@gmail.com",
+    "url": "http://polgarand.org"
+  },
+  "version": "1.0.0",
+  "description": "Device oriented Web MIDI API wrapper",
+  "keywords": [
+    "midi",
+    "api"
+  ],
+  "bugs": {
+    "url": "https://github.com/hngrhorace/nota-core/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hngrhorace/nota-core.git"
+  },
+  "main": "nota"
+}
