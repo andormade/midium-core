@@ -6,7 +6,12 @@
  * @returns {*}
  */
 function Nota(devices) {
-	this.initialize(devices);
+	this.eventListeners = [];
+	this.devices = [];
+
+	for (var i = 0; i < devices.length; i++) {
+		this.add(devices[i]);
+	}
 }
 
 /** @type {object} Midi access object. */
@@ -24,7 +29,7 @@ Nota.listenerCounter = 0;
  * @returns {void}
  */
 Nota.ready = function(callback) {
-	if (global.Nota.isReady) {
+	if (Nota.isReady) {
 		callback();
 	}
 
@@ -34,14 +39,14 @@ Nota.ready = function(callback) {
 
 		/* MIDI access granted */
 		function(midiAccess) {
-			global.Nota.isReady = true;
-			global.Nota.midiAccess = midiAccess;
+			Nota.isReady = true;
+			Nota.midiAccess = midiAccess;
 			callback();
 		},
 
 		/* MIDI access denied */
 		function(error) {
-			global.Nota.isReady = false;
+			Nota.isReady = false;
 			console.log(error);
 		}
 	);
@@ -55,7 +60,7 @@ Nota.ready = function(callback) {
  * @returns {array}
  */
 Nota.select = function(selector) {
-	if (!global.Nota.isReady) {
+	if (!Nota.isReady) {
 		return [];
 	}
 
@@ -71,16 +76,16 @@ Nota.select = function(selector) {
 
 	else if (
 		typeof selector === 'number' &&
-		global.Nota.midiAccess.inputs.has(query)
+		Nota.midiAccess.inputs.has(query)
 	) {
-		devices[0] = global.Nota.midiAccess.inputs.get(query);
+		devices[0] = Nota.midiAccess.inputs.get(query);
 	}
 
 	else if (
 		typeof query === 'number' &&
-		global.Nota.midiAccess.outputs.has(query)
+		Nota.midiAccess.outputs.has(query)
 	) {
-		devices[0] = global.Nota.midiAccess.outputs.get(query);
+		devices[0] = Nota.midiAccess.outputs.get(query);
 	}
 
 	else if (selector instanceof Array) {
@@ -95,14 +100,14 @@ Nota.select = function(selector) {
 	) {
 		var name = '';
 
-		global.Nota.midiAccess.inputs.forEach(function each(device) {
+		Nota.midiAccess.inputs.forEach(function each(device) {
 			name = device.name + ' ' + device.manufacturer;
 			if (new RegExp(selector, 'i').test(name)) {
 				devices.push(device);
 			}
 		});
 
-		global.Nota.midiAccess.outputs.forEach(function each(device) {
+		Nota.midiAccess.outputs.forEach(function each(device) {
 			name = device.name + ' ' + device.manufacturer;
 			if (new RegExp(selector, 'i').test(name)) {
 				devices.push(device);
@@ -114,22 +119,6 @@ Nota.select = function(selector) {
 };
 
 Nota.prototype = {
-	/**
-	 * Initiializes the device collection object.
-	 *
-	 * @param {array} devices    Array of midi devices
-	 *
-	 * @returns {void}
-	 */
-	initialize : function (devices) {
-		this.eventListeners = [];
-		this.devices = [];
-
-		for (var i = 0; i < devices.length; i++) {
-			this.add(devices[i]);
-		}
-	},
-
 	/**
 	 * Adds MIDI device to the collection.
 	 *
@@ -151,36 +140,10 @@ Nota.prototype = {
 	 * @returns {void}
 	 */
 	removeReferences : function () {
-		this.each(function (device) {
+		this.devices.forEach(function(device) {
 			device.onmidimessage = null;
 			device.onstatechange = null;
-		});
-	},
-
-	/**
-	 * Iterates through the devices in the collection.
-	 *
-	 * @param {function} callback   Callback function.
-	 *
-	 * @returns {object} Reference of this for method chaining.
-	 */
-	each : function (callback) {
-		for (var i = 0; i < this.devices.length; i++) {
-			callback(this.devices[i]);
-		}
-
-		return this;
-	},
-
-	/**
-	 * State change event handler.
-	 *
-	 * @param {object} event    State change event data.
-	 *
-	 * @returns {void}
-	 */
-	_onStateChange : function(event) {
-		console.log('state', event);
+		})
 	},
 
 	/**
@@ -191,7 +154,7 @@ Nota.prototype = {
 	 * @returns {object} Reference of this for method chaining.
 	 */
 	send : function (midiData) {
-		this.each(function (device) {
+		this.devices.forEach(function (device) {
 			if (device.type === 'output') {
 				device.send(midiData);
 			}
@@ -225,7 +188,7 @@ Nota.prototype = {
 	 * @returns {void}
 	 */
 	removeEventListener : function (references) {
-		[].concat(references).forEach(function (reference) {
+		Array.prototype.concat(references).forEach(function (reference) {
 			this.eventListeners.forEach(function (listener, index) {
 				if (listener.reference === reference) {
 					this.eventListeners.splice(index, 1);
@@ -257,6 +220,17 @@ Nota.prototype = {
 				listener.callback(event);
 			}
 		}, this);
+	},
+
+	/**
+	 * State change event handler.
+	 *
+	 * @param {object} event    State change event data.
+	 *
+	 * @returns {void}
+	 */
+	_onStateChange : function(event) {
+		console.log('state', event);
 	}
 };
 
