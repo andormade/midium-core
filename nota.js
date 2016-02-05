@@ -1,15 +1,16 @@
 /**
- * Shorthand for nota static functions.
+ * Constructor for a port colletion.
  *
- * @param {array} devices
+ * @param {array} ports
+ *
  * @returns {*}
  */
-function Nota(devices) {
+function Nota(ports) {
 	this.eventListeners = [];
-	this.devices = [];
+	this.ports = [];
 
-	for (var i = 0; i < devices.length; i++) {
-		this.add(devices[i]);
+	for (var i = 0; i < ports.length; i++) {
+		this.add(ports[i]);
 	}
 }
 
@@ -24,9 +25,11 @@ Nota.listenerCounter = 0;
  * Calls back when the MIDI driver is ready.
  *
  * @param {function} callback    Calls when the MIDI connection is ready.
+ * @param {function} errorCallback
+ *
  * @returns {void}
  */
-Nota.ready = function(callback) {
+Nota.ready = function(callback, errorCallback) {
 	if (Nota.isReady) {
 		callback();
 	}
@@ -45,7 +48,9 @@ Nota.ready = function(callback) {
 		/* MIDI access denied */
 		function(error) {
 			Nota.isReady = false;
-			console.log(error);
+			if (errorCallback) {
+				errorCallback(error);
+			}
 		}
 	);
 };
@@ -54,6 +59,7 @@ Nota.ready = function(callback) {
  * Returns with an array of MIDI inputs and outputs.
  *
  * @param {object|number|string|array} selector    Selector
+ *
  * @returns {array}
  */
 Nota.select = function(selector) {
@@ -61,33 +67,33 @@ Nota.select = function(selector) {
 		return [];
 	}
 
-	var devices = [];
+	var ports = [];
 
 	/* If the query is a MIDIInput or output. */
 	if (
 		selector instanceof window.MIDIOutput ||
 		selector instanceof window.MIDIInput
 	) {
-		devices[0] = selector;
+		ports[0] = selector;
 	}
 
 	else if (
 		typeof selector === 'number' &&
 		Nota.midiAccess.inputs.has(query)
 	) {
-		devices[0] = Nota.midiAccess.inputs.get(query);
+		ports[0] = Nota.midiAccess.inputs.get(query);
 	}
 
 	else if (
 		typeof query === 'number' &&
 		Nota.midiAccess.outputs.has(query)
 	) {
-		devices[0] = Nota.midiAccess.outputs.get(query);
+		ports[0] = Nota.midiAccess.outputs.get(query);
 	}
 
 	else if (selector instanceof Array) {
 		selector.forEach(function(item) {
-			devices.push(Nota.select(item)[0]);
+			ports.push(Nota.select(item)[0]);
 		});
 	}
 
@@ -97,61 +103,95 @@ Nota.select = function(selector) {
 	) {
 		var name = '';
 
-		Nota.midiAccess.inputs.forEach(function each(device) {
-			name = device.name + ' ' + device.manufacturer;
+		Nota.midiAccess.inputs.forEach(function each(port) {
+			name = port.name + ' ' + port.manufacturer;
 			if (new RegExp(selector, 'i').test(name)) {
-				devices.push(device);
+				ports.push(port);
 			}
 		});
 
-		Nota.midiAccess.outputs.forEach(function each(device) {
-			name = device.name + ' ' + device.manufacturer;
+		Nota.midiAccess.outputs.forEach(function each(port) {
+			name = port.name + ' ' + port.manufacturer;
 			if (new RegExp(selector, 'i').test(name)) {
-				devices.push(device);
+				ports.push(port);
 			}
 		});
 	}
 
-	return new Nota(devices);
+	return new Nota(ports);
+};
+
+/**
+ * Converts byte array to 24 bit integer.
+ *
+ * @param {number|array} byteArray    Byte array
+ *
+ * @returns {void}
+ */
+Nota.byteArrayToInt = function(byteArray) {
+	if (typeof byteArray === 'number') {
+		return byteArray;
+	}
+
+	return byteArray[0] * 0x10000 + byteArray[1] * 0x100 + byteArray[2];
+};
+
+/**
+ * Converts 24 bit integer to byte array.
+ *
+ * @param {number|array} int    24 bit integer
+ *
+ * @returns {void}
+ */
+Nota.intToByteArray = function(int) {
+	if (typeof int === 'array') {
+		return int;
+	}
+
+	return [int >> 16, (int >> 8) & 0x00ff,	int & 0x0000ff];
 };
 
 Nota.prototype = {
 	/**
-	 * Adds MIDI device to the collection.
+	 * Adds MIDI port to the collection.
 	 *
-	 * @param {object} device    MIDI device
+	 * @param {object} port    MIDI port
+	 *
 	 * @returns {object} Reference of this for method chaining.
 	 */
-	add : function (device) {
-		device.onstatechange = this._onStateChange.bind(this);
-		device.onmidimessage = this._onMIDIMessage.bind(this);
-		this.devices.push(device);
+	add : function (port) {
+		port.onstatechange = this._onStateChange.bind(this);
+		port.onmidimessage = this._onMIDIMessage.bind(this);
+		this.ports.push(port);
 
 		return this;
 	},
 
 	/**
-	 * Removes the references from the selected MIDI devices.
+	 * Removes the references from the selected MIDI ports.
 	 *
 	 * @returns {void}
 	 */
 	removeReferences : function () {
-		this.devices.forEach(function(device) {
-			device.onmidimessage = null;
-			device.onstatechange = null;
+		this.ports.forEach(function(port) {
+			port.onmidimessage = null;
+			port.onstatechange = null;
 		})
 	},
 
 	/**
-	 * Sends raw MIDI data
+	 * Sends raw MIDI data.
 	 *
-	 * @param {array} midiData    Array of MIDI data
+	 * @param {number|array} message    24 bit byte array or integer
+	 *
 	 * @returns {object} Reference of this for method chaining.
 	 */
-	send : function (midiData) {
-		this.devices.forEach(function (device) {
-			if (device.type === 'output') {
-				device.send(midiData);
+	send : function (message) {
+		message = Nota.intToByteArray(message);
+
+		this.ports.forEach(function (port) {
+			if (port.type === 'output') {
+				port.send(message);
 			}
 		});
 
@@ -161,13 +201,16 @@ Nota.prototype = {
 	/**
 	 * Register an event listener.
 	 *
-	 * @param {object} options    Event listener options.
+	 * @param {number|array} event    24 bit byte array or integer
+	 * @param {number|array} mask     24 bit byte array or integer
+	 * @param {function} callback
+	 *
 	 * @returns {object} Returns with the reference of the event listener.
 	 */
 	addEventListener : function (event, mask, callback) {
 		this.eventListeners.push({
-			event     : event,
-			mask      : mask,
+			event     : Nota.byteArrayToInt(event),
+			mask      : Nota.byteArrayToInt(mask),
 			reference : Nota.listenerCounter,
 			callback  : callback
 		});
@@ -179,6 +222,7 @@ Nota.prototype = {
 	 * Removes the given event listener or event listeners.
 	 *
 	 * @param {number|array} references    Event listener references.
+	 *
 	 * @returns {void}
 	 */
 	removeEventListener : function (references) {
@@ -195,13 +239,11 @@ Nota.prototype = {
 	 * MIDI message event handler.
 	 *
 	 * @param {object} event    MIDI event data.
+	 *
 	 * @returns {void}
 	 */
-	_onMIDIMessage : function (event) {
-		var data = event.data[0] * 0x10000 +
-			event.data[1] * 0x100 +
-			event.data[2];
-
+	_onMIDIMessage : function(event) {
+		var data = Nota.byteArrayToInt(event.data);
 		this.eventListeners.forEach(function (listener) {
 			if ((data & listener.mask) === listener.event) {
 				listener.callback(event);
@@ -213,6 +255,7 @@ Nota.prototype = {
 	 * State change event handler.
 	 *
 	 * @param {object} event    State change event data.
+	 *
 	 * @returns {void}
 	 */
 	_onStateChange : function(event) {
