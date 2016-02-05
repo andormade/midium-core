@@ -198,8 +198,8 @@ Nota.prototype = {
 	 * @returns {void}
 	 */
 	_onMIDIMessage : function (event) {
-		var data = event.data[0] * 0xffff +
-			event.data[1] * 0xff +
+		var data = event.data[0] * 0x10000 +
+			event.data[1] * 0x100 +
 			event.data[2];
 
 		this.eventListeners.forEach(function (listener) {
