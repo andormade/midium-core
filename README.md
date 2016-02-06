@@ -8,11 +8,12 @@ Nota.ready(function() {
 	 * See the documentation for details. */
 	var device = Nota.select('espruino');
 
-	/* You can send 24 bit messages in byte array format. */
+	/* You can send 24 bit messages in integer or in byte array format. */
 	device.send(0xaabbcc);
 	device.send([0xaa, 0xbb, 0xcc]);
 
-	/* You can listen to specific messages or  */
+	/* You can listen to specific messages, or every message by setting the mask
+	 * to zero. See the documentation for details. */
 	device.addEventListener(0xa10000, 0xff0000, function(data) {
 		console.log('data received', data);
 	});
