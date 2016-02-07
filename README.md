@@ -1,12 +1,12 @@
-# nota-core
-This package contains the core functions for the [Nota](https://github.com/hngrhorace/nota) Web MIDI API wrapper.
+# midium-core
+This package contains the core functions for the [Midium](https://github.com/hngrhorace/midium) Web MIDI API wrapper.
 It can be used to receive and send custom messages to your MIDI compatible hardware.
 
 ```javascript
-Nota.ready(function() {
+Midium.ready(function() {
 	/* You can select a device by it's manufacturer id or it's port id.
 	 * See the documentation for details. */
-	var device = Nota.select('espruino');
+	var device = Midium.select('espruino');
 
 	/* You can send 24 bit messages in integer or in byte array format. */
 	device.send(0xaabbcc);
@@ -21,17 +21,17 @@ Nota.ready(function() {
 ```
 ## Documentation
 ### Function reference
-#### Nota.ready(callback)
-Once the MIDI API is done with setting up things, it will call the passed function. The select method of Nota is not working until the MIDI API finished loading.
+#### Midium.ready(callback)
+Once the MIDI API is done with setting up things, it will call the passed function. The select method of Midium is not working until the MIDI API finished loading.
 
 ```javascript
-Nota.ready(function() {
+Midium.ready(function() {
 	/* Only after the MIDI API was ready, can you call the select method. */
-	Nota.select('');
+	Midium.select('');
 });
 ```
 
-#### Nota.select(selector)
+#### Midium.select(selector)
 Returns a collection of matched MIDI ports.
 You can select them by specifying
 - the manufacturer id of the MIDI device.
@@ -41,20 +41,20 @@ You can select them by specifying
 - a regular expression, which will match the name and the manufacturer.
 
 ```javascript
-Nota.select('m-audio');
-Nota.select('keystation');
-Nota.select(12345);
-Nota.select([12345, 6789]);
+Midium.select('m-audio');
+Midium.select('keystation');
+Midium.select(12345);
+Midium.select([12345, 6789]);
 ```
 
-#### Nota.prototype.send(message);
-You can send messages to the selected devices by passing them to this function.
+#### Midium.prototype.send(message);
+You can send a message to the selected ports by passing it to this function.
 You can pass it as an integer or as a byte array.
 Web MIDI API is working with byte arrays, so for the best performance it is recommended to use them instead of integers.
 
 ```javascript
-Nota.ready(function() {
-	var devices = Nota.select('');
+Midium.ready(function() {
+	var devices = Midium.select('');
 	/* You can send it as an integer. */
 	device.send(0xffffff);
 	/* or as a byte array. */
@@ -62,42 +62,43 @@ Nota.ready(function() {
 });
 ```
 
-#### Nota.prototype.addEventListener(message, mask, callback)
-Registers an event listener. The event listener matches the message argument with the received MIDI message. It they are matching, then it will call back.
+#### Midium.prototype.addEventListener(message, mask, callback)
+Registers an event listener. The event listener matches the message argument with the received MIDI messages.
 With the mask you can set exactly which bits you want to match.
-For example you can match only the most significant nibble with the 0xf00000 mask. It's useful when you want to listen to a specific MIDI event (like note on ) on every channel.
+For example you can match only the most significant nibble with the 0xf00000 mask, or the last significant bit with 0x000001.
+0xf00000 is useful when you want to listen to a specific MIDI event (like note on) on every channel.
 
 ```javascript
-var devices = Nota.select('');
-/* Checks to the most significant byte, calls back if it's 0xa0. */
+var devices = Midium.select('');
+/* Checks the most significant byte, calls back if it's 0xa0. */
 var reference = device.addEventListener(0xa00000, 0xff00000, function() {});
 ```
 
-It is recommended to remove unused event listeners to keep the performance of Nota on maximum. See the documentation of removeEventListener.
+It is recommended to remove unused event listeners to keep the performance of Midium on maximum. See the documentation of removeEventListener.
 
-#### Nota.prototype.removeEventListener(reference)
+#### Midium.prototype.removeEventListener(reference)
 Removes the specified event listener.
 
 ```javascript
-var devices = Nota.select('');
+var devices = Midium.select('');
 var reference = device.addEventListener(0xffffff, 0xffffff, function() {});
 device.removeEventListener(reference);
 ```
 
-It is recommended to remove unused event listeners to keep the performance of Nota on maximum.
+It is recommended to remove unused event listeners to keep the performance of Midium on maximum.
 
 ### Utility functions
-#### Nota.byteArrayToInt(byteArray)
+#### Midium.byteArrayToInt(byteArray)
 Converts the given byte array to a 24 bit integer.
 
 ```javascript
 /* It returns 0xaabbcc */
-Nota.byteArrayToInt([0xaa, 0xbb, 0xcc]);
+Midium.byteArrayToInt([0xaa, 0xbb, 0xcc]);
 ```
-#### Nota.intToByteArray(int)
+#### Midium.intToByteArray(int)
 Converts the given 24 bit integer to a byte array.
 
 ```javascript
 /* It returns [0xaa, 0xbb, 0xcc] */
-Nota.intToByteArray(0xaabbcc);
+Midium.intToByteArray(0xaabbcc);
 ```

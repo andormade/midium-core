@@ -5,7 +5,7 @@
  *
  * @returns {*}
  */
-function Nota(ports) {
+function Midium(ports) {
 	this.eventListeners = [];
 	this.ports = [];
 
@@ -15,11 +15,11 @@ function Nota(ports) {
 }
 
 /** @type {object} Midi access object. */
-Nota.midiAccess = null;
+Midium.midiAccess = null;
 
-Nota.isReady = false;
+Midium.isReady = false;
 
-Nota.listenerCounter = 0;
+Midium.listenerCounter = 0;
 
 /**
  * Calls back when the MIDI driver is ready.
@@ -29,8 +29,8 @@ Nota.listenerCounter = 0;
  *
  * @returns {void}
  */
-Nota.ready = function(callback, errorCallback) {
-	if (Nota.isReady) {
+Midium.ready = function(callback, errorCallback) {
+	if (Midium.isReady) {
 		callback();
 	}
 
@@ -40,14 +40,14 @@ Nota.ready = function(callback, errorCallback) {
 
 		/* MIDI access granted */
 		function(midiAccess) {
-			Nota.isReady = true;
-			Nota.midiAccess = midiAccess;
+			Midium.isReady = true;
+			Midium.midiAccess = midiAccess;
 			callback();
 		},
 
 		/* MIDI access denied */
 		function(error) {
-			Nota.isReady = false;
+			Midium.isReady = false;
 			if (errorCallback) {
 				errorCallback(error);
 			}
@@ -62,8 +62,8 @@ Nota.ready = function(callback, errorCallback) {
  *
  * @returns {array}
  */
-Nota.select = function(selector) {
-	if (!Nota.isReady) {
+Midium.select = function(selector) {
+	if (!Midium.isReady) {
 		return [];
 	}
 
@@ -79,21 +79,21 @@ Nota.select = function(selector) {
 
 	else if (
 		typeof selector === 'number' &&
-		Nota.midiAccess.inputs.has(query)
+		Midium.midiAccess.inputs.has(query)
 	) {
-		ports[0] = Nota.midiAccess.inputs.get(query);
+		ports[0] = Midium.midiAccess.inputs.get(query);
 	}
 
 	else if (
 		typeof query === 'number' &&
-		Nota.midiAccess.outputs.has(query)
+		Midium.midiAccess.outputs.has(query)
 	) {
-		ports[0] = Nota.midiAccess.outputs.get(query);
+		ports[0] = Midium.midiAccess.outputs.get(query);
 	}
 
 	else if (selector instanceof Array) {
 		selector.forEach(function(item) {
-			ports.push(Nota.select(item)[0]);
+			ports.push(Midium.select(item)[0]);
 		});
 	}
 
@@ -103,14 +103,14 @@ Nota.select = function(selector) {
 	) {
 		var name = '';
 
-		Nota.midiAccess.inputs.forEach(function each(port) {
+		Midium.midiAccess.inputs.forEach(function each(port) {
 			name = port.name + ' ' + port.manufacturer;
 			if (new RegExp(selector, 'i').test(name)) {
 				ports.push(port);
 			}
 		});
 
-		Nota.midiAccess.outputs.forEach(function each(port) {
+		Midium.midiAccess.outputs.forEach(function each(port) {
 			name = port.name + ' ' + port.manufacturer;
 			if (new RegExp(selector, 'i').test(name)) {
 				ports.push(port);
@@ -118,7 +118,7 @@ Nota.select = function(selector) {
 		});
 	}
 
-	return new Nota(ports);
+	return new Midium(ports);
 };
 
 /**
@@ -128,7 +128,7 @@ Nota.select = function(selector) {
  *
  * @returns {void}
  */
-Nota.byteArrayToInt = function(byteArray) {
+Midium.byteArrayToInt = function(byteArray) {
 	if (typeof byteArray === 'number') {
 		return byteArray;
 	}
@@ -143,7 +143,7 @@ Nota.byteArrayToInt = function(byteArray) {
  *
  * @returns {void}
  */
-Nota.intToByteArray = function(int) {
+Midium.intToByteArray = function(int) {
 	if (typeof int === 'array') {
 		return int;
 	}
@@ -151,7 +151,7 @@ Nota.intToByteArray = function(int) {
 	return [int >> 16, (int >> 8) & 0x00ff,	int & 0x0000ff];
 };
 
-Nota.prototype = {
+Midium.prototype = {
 	/**
 	 * Adds MIDI port to the collection.
 	 *
@@ -187,7 +187,7 @@ Nota.prototype = {
 	 * @returns {object} Reference of this for method chaining.
 	 */
 	send : function (message) {
-		message = Nota.intToByteArray(message);
+		message = Midium.intToByteArray(message);
 
 		this.ports.forEach(function (port) {
 			if (port.type === 'output') {
@@ -209,13 +209,13 @@ Nota.prototype = {
 	 */
 	addEventListener : function (event, mask, callback) {
 		this.eventListeners.push({
-			event     : Nota.byteArrayToInt(event),
-			mask      : Nota.byteArrayToInt(mask),
-			reference : Nota.listenerCounter,
+			event     : Midium.byteArrayToInt(event),
+			mask      : Midium.byteArrayToInt(mask),
+			reference : Midium.listenerCounter,
 			callback  : callback
 		});
 
-		return Nota.listenerCounter++;
+		return Midium.listenerCounter++;
 	},
 
 	/**
@@ -243,7 +243,7 @@ Nota.prototype = {
 	 * @returns {void}
 	 */
 	_onMIDIMessage : function(event) {
-		var data = Nota.byteArrayToInt(event.data);
+		var data = Midium.byteArrayToInt(event.data);
 		this.eventListeners.forEach(function (listener) {
 			if ((data & listener.mask) === listener.event) {
 				listener.callback(event);
@@ -264,8 +264,8 @@ Nota.prototype = {
 };
 
 if (typeof module !== 'undefined') {
-	module.exports = Nota;
+	module.exports = Midium;
 }
 else {
-	window.Nota = Nota;
+	window.Midium = Midium;
 }
