@@ -1,0 +1,17 @@
+{
+  "name": "midium-core",
+  "description": "Web MIDI API wrapper for general purpose",
+  "main": "midium-core",
+  "authors": [
+    "Andor Polgar"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "midi",
+    "web",
+    "api",
+    "midium"
+  ],
+  "homepage": "https://github.com/hngrhorace/midium-core",
+  "moduleType": []
+}
