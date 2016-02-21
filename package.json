@@ -5,17 +5,17 @@
     "email": "hngrhorace@gmail.com",
     "url": "http://polgarand.org"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Web MIDI API wrapper for general purposes",
   "keywords": [
     "midi",
-	"web",
+    "web",
     "api",
-	"midium"
+    "midium"
   ],
   "license": {
-	  "type": "MIT",
-	  "url": "http://www.opensource.org/licenses/mit-license.php"
+    "type": "MIT",
+    "url": "http://www.opensource.org/licenses/mit-license.php"
   },
   "bugs": {
     "url": "https://github.com/hngrhorace/midium-core/issues"
@@ -24,5 +24,16 @@
     "type": "git",
     "url": "https://github.com/hngrhorace/midium-core.git"
   },
-  "main": "midium-core"
+  "main": "dist/index.js",
+  "devDependencies": {
+    "babel-cli": "^6.5.1",
+    "babel-preset-es2015": "^6.5.0",
+    "browserify": "^13.0.0"
+  },
+  "jsnext:main": "src/index.js",
+  "scripts": {
+    "build:babel": "babel src --out-dir dist",
+    "build:browserify": "browserify dist/*.js --outfile bundle/midium-core.js",
+    "build": "npm run build:babel && npm run build:browserify"
+  }
 }
