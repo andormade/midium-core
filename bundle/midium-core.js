@@ -22,6 +22,7 @@ Object.assign(_midium2.default, Utils);
 
 global.Midium = _midium2.default;
 exports.default = _midium2.default;
+module.exports = exports['default'];
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./midium":2,"./utils":3}],2:[function(require,module,exports){
 'use strict';
@@ -221,6 +222,15 @@ var Midium = function () {
 				}
 			});
 		}
+
+		/**
+   * Returns with an array of MIDI inputs and outputs.
+   *
+   * @param {object|number|string|array} selector    Selector
+   *
+   * @returns {array}
+   */
+
 	}, {
 		key: 'select',
 		value: function select(selector) {
@@ -271,6 +281,7 @@ Midium.isReady = false;
 Midium.listenerCounter = 0;
 
 exports.default = Midium;
+module.exports = exports['default'];
 },{}],3:[function(require,module,exports){
 'use strict';
 

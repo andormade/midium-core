@@ -195,6 +195,15 @@ var Midium = function () {
 				}
 			});
 		}
+
+		/**
+   * Returns with an array of MIDI inputs and outputs.
+   *
+   * @param {object|number|string|array} selector    Selector
+   *
+   * @returns {array}
+   */
+
 	}, {
 		key: 'select',
 		value: function select(selector) {
@@ -245,3 +254,4 @@ Midium.isReady = false;
 Midium.listenerCounter = 0;
 
 exports.default = Midium;
+module.exports = exports['default'];

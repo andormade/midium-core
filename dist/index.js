@@ -20,3 +20,4 @@ Object.assign(_midium2.default, Utils);
 
 global.Midium = _midium2.default;
 exports.default = _midium2.default;
+module.exports = exports['default'];
