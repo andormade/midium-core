@@ -146,15 +146,16 @@ class Midium {
 	 * Sends raw MIDI data.
 	 *
 	 * @param {number|array} message    24 bit byte array or integer
+	 * @param {number} timestamp        Timestamp in milliseconds
 	 *
 	 * @returns {object} Reference of this for method chaining.
 	 */
-	send(message) {
+	send(message, timestamp) {
 		message = Midium.intToByteArray(message);
 
 		this.ports.forEach(function (port) {
 			if (port.type === 'output') {
-				port.send(message);
+				port.send(message, timestamp);
 			}
 		});
 

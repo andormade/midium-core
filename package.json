@@ -5,7 +5,7 @@
     "email": "hngrhorace@gmail.com",
     "url": "http://polgarand.org"
   },
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Web MIDI API wrapper for general purposes",
   "keywords": [
     "midi",
