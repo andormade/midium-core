@@ -3,9 +3,9 @@
   "author": {
     "name": "Andor Polgar",
     "email": "hngrhorace@gmail.com",
-    "url": "http://polgarand.org"
+    "url": "http://midium.io"
   },
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Web MIDI API wrapper for general purposes",
   "keywords": [
     "midi",
@@ -18,13 +18,13 @@
     "url": "http://www.opensource.org/licenses/mit-license.php"
   },
   "bugs": {
-    "url": "https://github.com/hngrhorace/midium-core/issues"
+    "url": "https://github.com/midijs/midium-core/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hngrhorace/midium-core.git"
+    "url": "https://github.com/midijs/midium-core.git"
   },
-  "main": "dist/index.js",
+  "main": "dist/midium.js",
   "devDependencies": {
     "babel-cli": "^6.5.1",
     "babel-plugin-add-module-exports": "^0.1.2",
