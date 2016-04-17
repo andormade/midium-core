@@ -4,7 +4,7 @@ class Midium {
 		this.ports = [];
 
 		if (Midium.isReady) {
-			this.add(portQuery(Midium.midiAccess, query));
+			this.add(Midium.portQuery(query));
 		}
 	}
 
@@ -90,7 +90,7 @@ class Midium {
 	}
 
 	static intToByteArray(int) {
-		if (typeof int === 'array') {
+		if (Array.isArray(int)) {
 			return int;
 		}
 
