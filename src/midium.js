@@ -91,6 +91,10 @@ class Midium {
 			return byteArray;
 		}
 
+		if (byteArray.length === 1) {
+			return byteArray[0] * 0x10000;
+		}
+
 		return byteArray[0] * 0x10000 + byteArray[1] * 0x100 + byteArray[2];
 	}
 
