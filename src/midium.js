@@ -123,12 +123,23 @@ class Midium {
 		});
 	}
 
-	send(message, timestamp) {
+	send(message, delay) {
 		message = Midium.intToByteArray(message);
+
+		if (this.isBuffering) {
+			this.buffer.push({
+				message : message,
+				delay   : delay
+			});
+		}
+
+		if (typeof delay !== 'undefined') {
+			delay += window.performance.now();
+		}
 
 		this.ports.forEach(function (port) {
 			if (port.type === 'output') {
-				port.send(message, timestamp);
+				port.send(message, delay);
 			}
 		});
 
@@ -154,6 +165,54 @@ class Midium {
 				}
 			}, this);
 		}, this);
+	}
+
+	startBuffering() {
+		if (!this.buffer) {
+			this.buffer = [];
+		}
+		this.isBuffering = true;
+		return this;
+	}
+
+	stopBuffering() {
+		this.isBuffering = false;
+		return this;
+	}
+
+	wait(delay) {
+		if (!this.isBuffering) {
+			return this;
+		}
+		this.buffer.push({
+			message : null,
+			delay   : delay
+		});
+		return this;
+	}
+
+	clearBuffer() {
+		this.buffer = [];
+		return this;
+	}
+
+	sendBuffer() {
+		var delay = 0;
+
+		this.buffer.forEach((message) => {
+			if (typeof message.delay === "number") {
+				delay += message.delay;
+			}
+			if (Array.isArray(message.message)) {
+				this.send(message.message, delay);
+			}
+		}, this);
+
+		return new Promise((resolve, reject) => {
+			setTimeout(() => {
+				resolve();
+			}, delay);
+		});
 	}
 
 	_onMIDIMessage(event) {
