@@ -1,3 +1,6 @@
+import FakeInput from './fakeInput';
+import FakeOutput from './fakeOutput';
+
 class Midium {
 	constructor(query) {
 		this.eventListeners = [];
@@ -34,7 +37,9 @@ class Midium {
 		/* If the query is a MIDIInput or output. */
 		if (
 			query instanceof window.MIDIOutput ||
-			query instanceof window.MIDIInput
+			query instanceof window.MIDIInput ||
+			query instanceof FakeInput ||
+			query instanceof FakeOutput
 		) {
 			ports[0] = query;
 		}
@@ -111,7 +116,7 @@ class Midium {
 		this.ports.forEach(function(port) {
 			port.onmidimessage = null;
 			port.onstatechange = null;
-		})
+		});
 	}
 
 	send(message, timestamp) {
@@ -163,5 +168,7 @@ class Midium {
 Midium.midiAccess = null;
 Midium.isReady = false;
 Midium.listenerCounter = 0;
+Midium.FakeInput = FakeInput;
+Midium.FakeOutput = FakeOutput;
 
 export default Midium;
