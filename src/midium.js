@@ -6,6 +6,9 @@ class Midium {
 		this.eventListeners = [];
 		this.ports = [];
 
+		this.stateChangeRef = this._onStateChange.bind(this);
+		this.midiMessageRef = this._onMIDIMessage.bind(this);
+
 		if (Midium.isReady) {
 			this.add(Midium.portQuery(query));
 		}
@@ -108,8 +111,8 @@ class Midium {
 
 	add(ports) {
 		Array.prototype.concat(ports).forEach(function(port) {
-			port.onstatechange = this._onStateChange.bind(this);
-			port.onmidimessage = this._onMIDIMessage.bind(this);
+			port.addEventListener('statechange', this.stateChangeRef);
+			port.addEventListener('midimessage', this.midiMessageRef);
 			this.ports.push(port);
 		}, this);
 
@@ -118,8 +121,8 @@ class Midium {
 
 	removeReferences() {
 		this.ports.forEach(function(port) {
-			port.onmidimessage = null;
-			port.onstatechange = null;
+			port.removeEventListener('midimessage', this.midiMessageRef);
+			port.removeEventListener('statechange', this.stateChangeRef);
 		});
 	}
 
